@@ -10,9 +10,9 @@
         },
         {
             "id": "UC3.2",
-            "name": "Detect Duplicate Issues",
-            "description": "System detects duplicate bug reports",
-            "status": "not-started"
+            "name": "View Bug Reports",
+            "description": "User can view all bug reports or view a single bug report by ID",
+            "status": "in-progress"
         },
         {
             "id": "UC3.3",

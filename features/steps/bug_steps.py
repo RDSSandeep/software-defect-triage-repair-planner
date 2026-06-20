@@ -106,3 +106,121 @@ def step_impl_check_error_message(context):
     assert context.response.status_code == 400, f"Expected 400 Bad Request, got {context.response.status_code}"
     res_data = context.response.json()
     assert "detail" in res_data, "Response body should contain error message detail"
+
+
+@given('the system has existing bug reports')
+def step_impl_has_existing_bugs(context):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # Insert a few mock bugs
+    cursor.execute(
+        "INSERT INTO bugs (id, title, description, environment, steps) VALUES (?, ?, ?, ?, ?)",
+        ("BUG-00001", "Login crash", "Crashes on click", "Chrome", "Click login")
+    )
+    cursor.execute(
+        "INSERT INTO bugs (id, title, description, environment, steps) VALUES (?, ?, ?, ?, ?)",
+        ("BUG-00002", "Session timeout", "Timeout after 1m", "Safari", "Wait 1m")
+    )
+    conn.commit()
+    conn.close()
+
+
+@when('the developer requests all bug reports')
+def step_impl_requests_all_bugs(context):
+    start_time = time.time()
+    response = context.client.get("/api/bugs", headers=getattr(context, 'headers', {}))
+    end_time = time.time()
+    context.response = response
+    context.response_time = end_time - start_time
+
+
+@then('the system should return a list of bugs')
+def step_impl_returns_list_of_bugs(context):
+    assert context.response.status_code == 200, f"Expected 200, got {context.response.status_code}"
+    assert isinstance(context.response.json(), list), "Expected list in response"
+
+
+@then('the list should contain all persistent bug reports')
+def step_impl_list_contains_all(context):
+    bugs = context.response.json()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM bugs")
+    count = cursor.fetchone()[0]
+    conn.close()
+    assert len(bugs) == count, f"Expected {count} bugs, got {len(bugs)}"
+
+
+@given('a bug exists with ID "{bug_id}"')
+def step_impl_bug_exists_with_id(context, bug_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM bugs WHERE id = ?", (bug_id,))
+    row = cursor.fetchone()
+    if not row:
+        cursor.execute(
+            "INSERT INTO bugs (id, title, description, environment, steps) VALUES (?, ?, ?, ?, ?)",
+            (bug_id, "Temporary title", "Temporary desc", "Chrome", "Steps")
+        )
+        conn.commit()
+    conn.close()
+
+
+@when('the developer requests bug with ID "{bug_id}"')
+def step_impl_request_bug_by_id(context, bug_id):
+    start_time = time.time()
+    response = context.client.get(f"/api/bugs/{bug_id}", headers=getattr(context, 'headers', {}))
+    end_time = time.time()
+    context.response = response
+    context.response_time = end_time - start_time
+
+
+@then('the system should return the bug details')
+def step_impl_returns_bug_details(context):
+    assert context.response.status_code == 200, f"Expected 200, got {context.response.status_code}"
+    data = context.response.json()
+    assert "id" in data
+    assert "title" in data
+
+
+@then('the retrieved bug details should match the expected ID "{bug_id}"')
+def step_impl_details_match_id(context, bug_id):
+    data = context.response.json()
+    assert data["id"] == bug_id, f"Expected {bug_id}, got {data['id']}"
+
+
+@given('no bug exists with ID "{bug_id}"')
+def step_impl_no_bug_exists(context, bug_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM bugs WHERE id = ?", (bug_id,))
+    conn.commit()
+    conn.close()
+
+
+@then('the system should return a not found error')
+def step_impl_returns_not_found(context):
+    assert context.response.status_code == 404, f"Expected 404, got {context.response.status_code}"
+    res_data = context.response.json()
+    assert "detail" in res_data
+
+
+@when('the developer requests the bug using the generated issue ID')
+def step_impl_request_generated_id(context):
+    res_data = context.response.json()
+    bug_id = res_data["id"]
+    start_time = time.time()
+    response = context.client.get(f"/api/bugs/{bug_id}", headers=getattr(context, 'headers', {}))
+    end_time = time.time()
+    context.response = response
+    context.response_time = end_time - start_time
+
+
+@then('the retrieved bug details should match the submitted report')
+def step_impl_retrieved_matches_submitted(context):
+    assert context.response.status_code == 200, f"Expected 200, got {context.response.status_code}"
+    retrieved = context.response.json()
+    assert retrieved["title"] == "Read failure"
+    assert retrieved["description"] == "Cannot retrieve records"
+    assert retrieved["environment"] == "Firefox"
+
