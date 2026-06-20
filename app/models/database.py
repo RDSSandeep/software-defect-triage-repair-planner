@@ -22,8 +22,16 @@ def init_db():
             description TEXT NOT NULL,
             environment TEXT NOT NULL,
             steps TEXT,
+            priority TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+
+    # Safe migration: add priority column to existing databases if absent
+    cursor.execute("PRAGMA table_info(bugs)")
+    columns = [row[1] for row in cursor.fetchall()]
+    if "priority" not in columns:
+        cursor.execute("ALTER TABLE bugs ADD COLUMN priority TEXT")
+
     conn.commit()
     conn.close()

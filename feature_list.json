@@ -12,13 +12,14 @@
             "id": "UC3.2",
             "name": "View Bug Reports",
             "description": "User can view all bug reports or view a single bug report by ID",
-            "status": "in-progress"
+            "status": "done"
         },
         {
             "id": "UC3.3",
-            "name": "Prioritize Bug",
-            "description": "System recommends priority",
-            "status": "not-started"
+            "name": "Assign Bug Priority",
+            "description": "Developer or triage engineer assigns a priority level (Low, Medium, High, Critical) to an existing bug report. Includes AI-assisted rule-based classifier via POST /api/bugs/classify.",
+            "status": "done",
+            "evidence": "UC3.3: 5 Behave scenarios passed (assign valid priority, reject invalid, 404, persist, performance). UC3.3b: 5 classifier scenarios passed (Critical, High, Medium, Low, empty-field validation)."
         },
         {
             "id": "UC3.4",

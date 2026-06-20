@@ -224,3 +224,97 @@ def step_impl_retrieved_matches_submitted(context):
     assert retrieved["description"] == "Cannot retrieve records"
     assert retrieved["environment"] == "Firefox"
 
+
+# ---------------------------------------------------------------------------
+# UC3.3 — Assign Bug Priority step definitions
+# ---------------------------------------------------------------------------
+
+@when('the developer assigns priority "{priority}" to bug "{bug_id}"')
+def step_impl_assign_priority(context, priority, bug_id):
+    start_time = time.time()
+    response = context.client.patch(
+        f"/api/bugs/{bug_id}/priority",
+        json={"priority": priority},
+        headers=getattr(context, 'headers', {})
+    )
+    end_time = time.time()
+    context.response = response
+    context.response_time = end_time - start_time
+
+
+@then('the system should update the bug priority successfully')
+def step_impl_priority_updated(context):
+    assert context.response.status_code == 200, \
+        f"Expected 200 OK, got {context.response.status_code}"
+    data = context.response.json()
+    assert "priority" in data, "Response should contain 'priority'"
+    assert "message" in data, "Response should contain 'message'"
+    assert data["message"] == "Priority updated successfully"
+
+
+@then('the bug priority should be "{expected_priority}"')
+def step_impl_check_priority_value(context, expected_priority):
+    data = context.response.json()
+    # Works for both PATCH response and GET response
+    assert data.get("priority") == expected_priority, \
+        f"Expected priority '{expected_priority}', got '{data.get('priority')}'"
+
+
+@when('the developer retrieves bug "{bug_id}"')
+def step_impl_retrieve_bug(context, bug_id):
+    start_time = time.time()
+    response = context.client.get(
+        f"/api/bugs/{bug_id}",
+        headers=getattr(context, 'headers', {})
+    )
+    end_time = time.time()
+    context.response = response
+    context.response_time = end_time - start_time
+
+
+# ---------------------------------------------------------------------------
+# UC3.3b — AI Bug Priority Classification step definitions
+# ---------------------------------------------------------------------------
+
+@when('the developer classifies a bug with title "{title}" description "{description}" environment "{environment}"')
+def step_impl_classify_bug(context, title, description, environment):
+    start_time = time.time()
+    response = context.client.post(
+        "/api/bugs/classify",
+        json={
+            "title": title if title else None,
+            "description": description if description else None,
+            "environment": environment if environment else None,
+            "steps": None,
+        },
+        headers=getattr(context, 'headers', {})
+    )
+    end_time = time.time()
+    context.response = response
+    context.response_time = end_time - start_time
+
+
+@then('the classification result priority should be "{expected_priority}"')
+def step_impl_check_classification_priority(context, expected_priority):
+    assert context.response.status_code == 200, \
+        f"Expected 200 OK, got {context.response.status_code}: {context.response.text}"
+    data = context.response.json()
+    assert "priority" in data, "Response missing 'priority' field"
+    assert "reason" in data, "Response missing 'reason' field"
+    assert data["priority"] == expected_priority, \
+        f"Expected priority '{expected_priority}', got '{data['priority']}'. Reason: {data.get('reason')}"
+
+
+@when('the developer classifies a bug with title "" description "" environment ""')
+def step_impl_classify_bug_empty(context):
+    """Dedicated step for all-empty-fields edge case (Behave literal match)."""
+    import time as _time
+    start_time = _time.time()
+    response = context.client.post(
+        "/api/bugs/classify",
+        json={"title": None, "description": None, "environment": None, "steps": None},
+        headers=getattr(context, 'headers', {})
+    )
+    end_time = _time.time()
+    context.response = response
+    context.response_time = end_time - start_time
