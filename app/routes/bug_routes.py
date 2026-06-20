@@ -124,8 +124,7 @@ def generate_summary(request: SummaryRequest):
 class RegressionRequest(BaseModel):
     bug_id: str
 
-
-@router.post("/bugs/regression")
+@router.post("/regression")
 def regression_analysis(request: RegressionRequest):
     bug = get_bug_by_id(request.bug_id)
 
@@ -145,7 +144,7 @@ def regression_analysis(request: RegressionRequest):
 # UC8 - Traceability Report
 # =========================
 
-@router.get("/bugs/traceability/{bug_id}")
+@router.get("/traceability/{bug_id}")
 def traceability_report(bug_id: str):
     bug = get_bug_by_id(bug_id)
 

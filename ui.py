@@ -240,22 +240,22 @@ with tab4:
 
     bug_id = st.text_input("Enter Bug ID for Summary", key="summary_bug")
 
-if st.button("Generate Summary"):
-    if not bug_id:
-        st.error("Bug ID required")
-    else:
-        try:
-            summary_res = requests.post(
+    if st.button("Generate Summary"):
+        if not bug_id:
+            st.error("Bug ID required")
+        else:
+            try:
+                summary_res = requests.post(
                 f"{API_URL}/summarize",
                 json={"bug_id": bug_id}
-            )
+                )
 
-            st.write("STATUS:", summary_res.status_code)   # DEBUG LINE
+                st.write("STATUS:", summary_res.status_code)   # DEBUG LINE
 
-            if summary_res.status_code == 200:
-                data = summary_res.json()
+                if summary_res.status_code == 200:
+                    data = summary_res.json()
 
-                st.markdown(f"""
+                    st.markdown(f"""
                 <h4>🧠 Summary</h4>
                 <p>{data.get("summary")}</p>
 
@@ -263,11 +263,11 @@ if st.button("Generate Summary"):
                 <p>{data.get("impact")}</p>
                 """, unsafe_allow_html=True)
 
-            else:
-                st.error(summary_res.text)
+                else:
+                    st.error(summary_res.text)
 
-        except Exception as e:
-            st.error(f"Error: {str(e)}")
+            except Exception as e:
+                st.error(f"Error: {str(e)}")
 
 # =================================================
 # UC7 - REGRESSION RISK ANALYZER
