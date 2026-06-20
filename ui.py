@@ -28,13 +28,15 @@ html, body, [class*="css"] {
 st.title("🐞 Bug Triage & Repair Planner")
 st.markdown("Automated bug intake, lookup, and triage tracking system.")
 
-# ✅ UPDATED TABS (added UC3.3)
-tab1, tab2, tab3 = st.tabs([
+# ✅ TABS
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "📝 Submit Bug Report",
     "🔍 View Bug Reports",
-    "🎯 Assign Priority (UC3.3)"
+    "🎯 Assign Priority",
+    "📄 Bug Summary Generator",
+    "📊 Regression Analyzer",
+    "🔗 Traceability"
 ])
-
 # =========================
 # UC3.1 - Submit Bug
 # =========================
@@ -110,9 +112,9 @@ with tab2:
     except:
         st.error("Backend not running")
 
-# =========================
-# UC3.3 - Assign Priority + AI Suggest
-# =========================
+# =================================================
+# UC3.3 & UC3.4 - Assign Priority + AI Suggest
+# =================================================
 with tab3:
     st.header("🎯 Assign Bug Priority")
     st.markdown("Use **AI Suggest** to auto-classify the priority, then confirm or override before saving.")
@@ -229,3 +231,91 @@ with tab3:
                         pass
             except requests.exceptions.ConnectionError:
                 st.error("Backend not running.")
+
+# =================================================
+# UC5 & UC6 - BUG SUMMARY GENERATOR
+# =================================================
+with tab4:
+    st.header("📄 Bug Summary Generator")
+
+    bug_id = st.text_input("Enter Bug ID for Summary", key="summary_bug")
+
+if st.button("Generate Summary"):
+    if not bug_id:
+        st.error("Bug ID required")
+    else:
+        try:
+            summary_res = requests.post(
+                f"{API_URL}/summarize",
+                json={"bug_id": bug_id}
+            )
+
+            st.write("STATUS:", summary_res.status_code)   # DEBUG LINE
+
+            if summary_res.status_code == 200:
+                data = summary_res.json()
+
+                st.markdown(f"""
+                <h4>🧠 Summary</h4>
+                <p>{data.get("summary")}</p>
+
+                <h4>⚠️ Impact</h4>
+                <p>{data.get("impact")}</p>
+                """, unsafe_allow_html=True)
+
+            else:
+                st.error(summary_res.text)
+
+        except Exception as e:
+            st.error(f"Error: {str(e)}")
+
+# =================================================
+# UC7 - REGRESSION RISK ANALYZER
+# =================================================
+with tab5:
+    st.header("📊 Regression Risk Analyzer")
+
+    bug_id = st.text_input("Enter Bug ID for Regression Check", key="reg_bug")
+
+    if st.button("Analyze Risk"):
+        try:
+            res = requests.post(f"{API_URL}/regression", json={"bug_id": bug_id})
+
+            if res.status_code == 200:
+                data = res.json()
+
+                st.success("Analysis Complete")
+
+                st.metric("Regression Risk", data["regression_risk"])
+                st.caption(data["note"])
+            else:
+                st.error("Analysis failed")
+        except:
+            st.error("Backend not running")
+
+# =================================================
+# UC8 - TRACEABILITY REPORT
+# =================================================
+with tab6:
+    st.header("🔗 Traceability Report")
+
+    bug_id = st.text_input("Enter Bug ID for Traceability", key="trace_bug")
+
+    if st.button("Generate Traceability Report"):
+        try:
+            res = requests.get(f"{API_URL}/traceability/{bug_id}")
+
+            if res.status_code == 200:
+                data = res.json()
+
+                st.success("Traceability Generated")
+
+                st.json(data)
+
+                st.markdown("### Coverage")
+                st.info(data["coverage"])
+            else:
+                st.error("Bug not found")
+
+        except:
+            st.error("Backend not running")

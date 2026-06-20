@@ -1,4 +1,5 @@
 from app.models.database import get_db_connection
+import sqlite3
 
 VALID_PRIORITIES = {"Low", "Medium", "High", "Critical"}
 
@@ -193,3 +194,41 @@ def classify_bug_priority(title: str, description: str,
         "priority": "Low",
         "reason": "No critical, high, or medium indicators detected; classified as minor/cosmetic"
     }
+def summarize_bug(bug):
+    text = f"{bug['title']} {bug['description']} {bug['environment']} {bug.get('steps','')}".lower()
+
+    if "crash" in text:
+        return {
+            "summary": "Application crash during execution.",
+            "impact": "System unusable for end users."
+        }
+
+    if "login" in text:
+        return {
+            "summary": "Login flow failure detected.",
+            "impact": "Users cannot access the system."
+        }
+
+    if "slow" in text:
+        return {
+            "summary": "Performance issue detected.",
+            "impact": "Degraded user experience."
+        }
+
+    return {
+        "summary": "General functional issue reported.",
+        "impact": "Requires developer investigation."
+    }
+def get_bug_by_id(bug_id: str):
+    conn = sqlite3.connect("bugs.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM bugs WHERE id = ?", (bug_id,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        return None
+
+    return dict(row)

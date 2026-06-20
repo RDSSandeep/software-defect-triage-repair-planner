@@ -1,20 +1,20 @@
 import sqlite3
 import os
 
-# Ensure DB is created in the data/ directory under project root
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DB_DIR = os.path.join(BASE_DIR, "data")
-DB_PATH = os.path.join(DB_DIR, "bug_tracker.db")
+DB_PATH = "bugs.db"
+
 
 def get_db_connection():
-    os.makedirs(DB_DIR, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
+
+    # Main table (fresh install)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS bugs (
             id TEXT PRIMARY KEY,
@@ -27,11 +27,18 @@ def init_db():
         )
     """)
 
-    # Safe migration: add priority column to existing databases if absent
+    # Migration safety (older DBs)
     cursor.execute("PRAGMA table_info(bugs)")
     columns = [row[1] for row in cursor.fetchall()]
+
     if "priority" not in columns:
         cursor.execute("ALTER TABLE bugs ADD COLUMN priority TEXT")
 
     conn.commit()
     conn.close()
+
+
+def reset_db():
+    """Use ONLY for debugging if DB is broken"""
+    if os.path.exists(DB_PATH):
+        os.remove(DB_PATH)
