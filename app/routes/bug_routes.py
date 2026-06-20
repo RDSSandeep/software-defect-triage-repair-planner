@@ -124,6 +124,7 @@ def generate_summary(request: SummaryRequest):
 class RegressionRequest(BaseModel):
     bug_id: str
 
+
 @router.post("/regression")
 def regression_analysis(request: RegressionRequest):
     bug = get_bug_by_id(request.bug_id)
