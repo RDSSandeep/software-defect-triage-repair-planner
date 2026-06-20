@@ -1,0 +1,66 @@
+{
+    "project": "software-defect-triage-repair-planner",
+    "description": "AI-assisted defect triage, root cause analysis, and repair planning system",
+    "usecases": [
+        {
+            "id": "UC3.1",
+            "name": "Submit Bug Report",
+            "description": "Developer submits a bug report",
+            "status": "done"
+        },
+        {
+            "id": "UC3.2",
+            "name": "Detect Duplicate Issues",
+            "description": "System detects duplicate bug reports",
+            "status": "not-started"
+        },
+        {
+            "id": "UC3.3",
+            "name": "Prioritize Bug",
+            "description": "System recommends priority",
+            "status": "not-started"
+        },
+        {
+            "id": "UC3.4",
+            "name": "Infer Root Cause Area",
+            "description": "System identifies likely root cause",
+            "status": "not-started"
+        },
+        {
+            "id": "UC3.5",
+            "name": "Propose Repair Plan",
+            "description": "System generates repair plan",
+            "status": "not-started"
+        },
+        {
+            "id": "UC3.6",
+            "name": "Generate Acceptance Scenarios",
+            "description": "System generates Gherkin scenarios",
+            "status": "not-started"
+        },
+        {
+            "id": "UC3.7",
+            "name": "Recommend Relevant Files",
+            "description": "System suggests code files",
+            "status": "not-started"
+        },
+        {
+            "id": "UC3.8",
+            "name": "Summarize Failure Bundle",
+            "description": "System summarizes test failures",
+            "status": "not-started"
+        },
+        {
+            "id": "UC3.9",
+            "name": "Reprioritize After Failures",
+            "description": "System updates priority dynamically",
+            "status": "not-started"
+        },
+        {
+            "id": "UC3.10",
+            "name": "Release Risk Summary",
+            "description": "System generates release risk report",
+            "status": "not-started"
+        }
+    ]
+}

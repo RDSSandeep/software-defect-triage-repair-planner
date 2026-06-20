@@ -1,0 +1,45 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Feature List Schema",
+    "type": "object",
+    "properties": {
+        "usecases": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "not-started",
+                            "in-progress",
+                            "blocked",
+                            "done"
+                        ]
+                    },
+                    "evidence": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "status"
+                ]
+            }
+        }
+    },
+    "required": [
+        "usecases"
+    ]
+}

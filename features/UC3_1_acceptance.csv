@@ -1,0 +1,5 @@
+scenario_id,description,priority,acceptance_criteria
+SC1,Valid bug submission,High,Bug is created with ID in under 3 seconds
+SC2,Missing title validation,High,System rejects request with validation error
+SC3,Missing description validation,High,System rejects request with validation error
+SC4,Invalid environment input,Medium,System rejects invalid environment and returns error message
